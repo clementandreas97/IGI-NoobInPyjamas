@@ -9,30 +9,32 @@ public class MovementControl : MonoBehaviour {
 	[SerializeField] float nearTreshold = 0.02f;
 	[SerializeField] float tileDistance = 0.5f;
 
-	private bool movementLock = false;
+	private LevelManager lvManager;
 	private Vector3 target;
+	private bool isMoving = false;
 
 	// Use this for initialization
 	void Start () {
+		lvManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
 	}
 	
 	// Update is called once per frame
 	void Update () {
-		Debug.Log (movementLock);
-		if (movementLock && !transform.position.Equals(target)) {
+		if (!lvManager.IsMovable() && !transform.position.Equals(target) && isMoving) {
 			transform.position = Vector3.Lerp (transform.position, target, moveSpeed * Time.deltaTime);
 			if (NearTarget ()) {
-				Debug.Log("set to target");
 				transform.position = target;
-				movementLock = false;
+				lvManager.setMovable (true);
+				isMoving = false;
 			}
 		}
 	}
 
 	public void Move(string movement) {
+		isMoving = true;
 		float x, y;
-		if (!movementLock) {
-			movementLock = true;
+		if (lvManager.IsMovable()) {
+			lvManager.setMovable (false);
 			Jump ();
 
 			switch (movement) {
@@ -77,7 +79,6 @@ public class MovementControl : MonoBehaviour {
 	}
 
 	bool NearTarget() {
-		Debug.Log (transform.position + " " + target + " = " + Vector3.Distance(transform.position, target));
 		return (Vector3.Distance (transform.position, target) < nearTreshold);
 	}
 
